@@ -401,104 +401,31 @@
 
     <div class="steps">
 
-      <!-- Step 1 — Gemini 分析入口 -->
+      <!-- Step 1 -->
       <div class="step">
         <div class="step-meta">
           <div class="step-number">Step 01</div>
-          <h3 class="step-heading">點擊「Gemini 分析」<br>啟動 AI 正規化</h3>
+          <h3 class="step-heading">在 ERCanvas 設計<br>邏輯模型並匯出 SQL</h3>
           <p class="step-body">
-            在 ERCanvas 完成初步資料表設計後，點擊右上角的
-            <strong>「輸出 PDF 並交由 Gemini 分析」</strong>按鈕，讓 AI 接手優化你的資料庫結構。
-          </p>
-          <div class="tip">
-            <span class="tip-icon">🤖</span>
-            <span>此步驟會將畫布內容轉為 PDF 並自動送交 Gemini，<strong>無需手動操作</strong>，全程自動化。</span>
-          </div>
-        </div>
-        <div class="step-img">
-          <div class="card-wrap" data-step="n1">
-            <img src="norm1.png" alt="點擊 Gemini 分析按鈕" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🤖 norm1.png — 點擊 Gemini 分析</div>'">
-            <div class="card-overlay"></div>
-            <div class="card-badge">Gemini AI</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2 — 確認並開始分析 -->
-      <div class="step">
-        <div class="step-img">
-          <div class="card-wrap" data-step="n2">
-            <img src="norm2.png" alt="開始分析視窗" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>▶️ norm2.png — 開始分析視窗</div>'">
-            <div class="card-overlay"></div>
-            <div class="card-badge">Analysis</div>
-          </div>
-        </div>
-        <div class="step-meta">
-          <div class="step-number">Step 02</div>
-          <h3 class="step-heading">確認分析流程<br>點擊「開始分析」</h3>
-          <p class="step-body">
-            系統彈出說明視窗，顯示三個自動步驟：
-          </p>
-          <ol style="color:var(--muted);line-height:2.2;padding-left:1.2rem;font-size:0.95rem;">
-            <li>把畫布輸出為 <strong style="color:var(--text);">PDF 檔</strong>並下載到本機</li>
-            <li>用外接 Gemini <strong style="color:var(--text);">讀取 PDF</strong> 並輸出正規化建議</li>
-            <li>將 Gemini 建議轉成可建立的<strong style="color:var(--text);">邏輯資料表</strong></li>
-          </ol>
-          <div class="tip">
-            <span class="tip-icon">⚠️</span>
-            <span>需事先在伺服器設定環境變數 <strong>GEMINI_API_KEY</strong>，可選設定 GEMINI_MODEL。</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 3 — 查看正規化結果 -->
-      <div class="step">
-        <div class="step-meta">
-          <div class="step-number">Step 03</div>
-          <h3 class="step-heading">查看正規化建議<br>建立實體圖</h3>
-          <p class="step-body">
-            Gemini 分析完成後，視窗會顯示<strong>正規化後的資料表預覽</strong>，包含各表欄位建議（如：賽道、車手、車隊、賽事…）。<br><br>
-            確認無誤後點擊<strong>「建立正規化實體圖」</strong>，自動產生優化後的 ER 圖。
-          </p>
-          <div class="tip">
-            <span class="tip-icon">✨</span>
-            <span>Gemini 會依資料領域自動判斷並建議合理的資料表數量與欄位，大幅減少人工設計時間。</span>
-          </div>
-        </div>
-        <div class="step-img">
-          <div class="card-wrap" data-step="n3">
-            <img src="norm3.png" alt="正規化結果與建立實體圖" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>✨ norm3.png — 正規化結果</div>'">
-            <div class="card-overlay"></div>
-            <div class="card-badge">Result</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 4 (原 Step 1) -->
-      <div class="step">
-        <div class="step-img">
-          <div class="card-wrap" data-step="1">
-            <img src="step1.png" alt="ERCanvas 匯出 MySQL SQL" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>📤 step1.png — 匯出 MySQL SQL</div>'">
-            <div class="card-overlay"></div>
-            <div class="card-badge">Export SQL</div>
-          </div>
-        </div>
-        <div class="step-meta">
-          <div class="step-number">Step 04</div>
-          <h3 class="step-heading">匯出 MySQL SQL<br>完成資料庫設計</h3>
-          <p class="step-body">
-            正規化完成、ER 圖建立後，點擊頂部工具列的
-            <strong>「匯出 MySQL SQL」</strong>按鈕將設計轉換為可執行的 SQL 語法。<br><br>
-            同時可使用<strong>「外來鍵設定關聯主鍵」</strong>確保匯出的資料完整性。
+            在 ERCanvas 的<strong>邏輯模型</strong>模式中建立 ER 圖，設定好資料表與欄位後，點擊頂部工具列的
+            <strong>「匯出 MySQL SQL」</strong>按鈕。<br><br>
+            善用<strong>「AI 自動正規化」</strong>功能讓模型自動優化，以及<strong>「外來鍵設定關聯主鍵」</strong>確保資料完整性。
           </p>
           <div class="tip">
             <span class="tip-icon">💡</span>
-            <span>匯出時系統會<strong>自動帶入 Gemini 翻譯的英文名稱</strong>，無需再手動輸入欄位英文。</span>
+            <span>匯出時系統會<strong>自動帶入英文名稱</strong>，無需手動輸入欄位英文。</span>
+          </div>
+        </div>
+        <div class="step-img">
+          <div class="card-wrap" data-step="1">
+            <img src="step1.png" alt="ERCanvas 邏輯模型設計介面" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>📐 step1.png — ERCanvas 設計介面</div>'">
+            <div class="card-overlay"></div>
+            <div class="card-badge">ERCanvas</div>
           </div>
         </div>
       </div>
 
-      <!-- Step 5 -->
+      <!-- Step 2 -->
       <div class="step">
         <div class="step-img">
           <div class="card-wrap" data-step="2">
@@ -508,7 +435,7 @@
           </div>
         </div>
         <div class="step-meta">
-          <div class="step-number">Step 05</div>
+          <div class="step-number">Step 02</div>
           <h3 class="step-heading">自動產生 .sql<br>與中英翻譯對照檔</h3>
           <p class="step-body">
             匯出完成後，系統會自動儲存兩份檔案到你的電腦：
@@ -524,10 +451,10 @@
         </div>
       </div>
 
-      <!-- Step 6 -->
+      <!-- Step 3 -->
       <div class="step">
         <div class="step-meta">
-          <div class="step-number">Step 06</div>
+          <div class="step-number">Step 03</div>
           <h3 class="step-heading">開啟 MySQL Workbench<br>選擇或建立連線</h3>
           <p class="step-body">
             開啟 MySQL Workbench，在首頁的 <strong>MySQL Connections</strong> 中選擇目標資料庫連線（如 t1、t2、t3）。
@@ -546,7 +473,7 @@
         </div>
       </div>
 
-      <!-- Step 7 -->
+      <!-- Step 4 -->
       <div class="step">
         <div class="step-img">
           <div class="card-wrap" data-step="4">
@@ -556,7 +483,7 @@
           </div>
         </div>
         <div class="step-meta">
-          <div class="step-number">Step 07</div>
+          <div class="step-number">Step 04</div>
           <h3 class="step-heading">匯入 .sql 檔案<br>載入建表語法</h3>
           <p class="step-body">
             進入連線後，點擊左上角的<strong>「開啟 SQL 檔案」</strong>圖示（資料夾圖示），選擇剛剛匯出的 <strong>.sql 檔案</strong>。<br><br>
@@ -569,10 +496,10 @@
         </div>
       </div>
 
-      <!-- Step 8 -->
+      <!-- Step 5 -->
       <div class="step">
         <div class="step-meta">
-          <div class="step-number">Step 08</div>
+          <div class="step-number">Step 05</div>
           <h3 class="step-heading">點擊閃電圖示<br>執行並完成建表</h3>
           <p class="step-body">
             確認 SQL 內容無誤後，點擊工具列上的<strong>閃電 ⚡ 圖示</strong>執行所有語法。<br><br>
@@ -592,7 +519,7 @@
         </div>
       </div>
 
-      <!-- Step 9 -->
+      <!-- Step 6 -->
       <div class="step">
         <div class="step-img">
           <div class="card-wrap" data-step="6">
@@ -602,7 +529,7 @@
           </div>
         </div>
         <div class="step-meta">
-          <div class="step-number">Step 09</div>
+          <div class="step-number">Step 06</div>
           <h3 class="step-heading">直接在表格內<br>編輯欄位資料</h3>
           <p class="step-body">
             若對自動翻譯的欄位名稱不滿意，可在 MySQL Workbench 的表格視圖中<strong>直接點擊編輯</strong>，無需重新設定所有數值資料。
@@ -614,10 +541,10 @@
         </div>
       </div>
 
-      <!-- Step 10 -->
+      <!-- Step 7 -->
       <div class="step">
         <div class="step-meta">
-          <div class="step-number">Step 10</div>
+          <div class="step-number">Step 07</div>
           <h3 class="step-heading">外來鍵自動<br>連回對應主鍵</h3>
           <p class="step-body">
             建立完成後，MySQL Workbench 會自動識別<strong>外來鍵關聯</strong>，並正確連結回對應的主鍵資料表，無需手動設定關聯。
@@ -632,6 +559,79 @@
             <img src="step7.png" alt="外來鍵自動連回主鍵" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🔗 step7.png — 外來鍵關聯</div>'">
             <div class="card-overlay"></div>
             <div class="card-badge">Foreign Key</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 8 — Gemini 分析入口 -->
+      <div class="step">
+        <div class="step-meta">
+          <div class="step-number">Step 08</div>
+          <h3 class="step-heading">點擊「Gemini 分析」<br>啟動 AI 正規化</h3>
+          <p class="step-body">
+            完成基本流程後，可進一步點擊右上角的
+            <strong>「輸出 PDF 並交由 Gemini 分析」</strong>按鈕，讓 AI 重新審視並優化你的資料庫結構。
+          </p>
+          <div class="tip">
+            <span class="tip-icon">🤖</span>
+            <span>此步驟會將畫布內容轉為 PDF 並自動送交 Gemini，<strong>無需手動操作</strong>，全程自動化。</span>
+          </div>
+        </div>
+        <div class="step-img">
+          <div class="card-wrap" data-step="n1">
+            <img src="norm1.png" alt="點擊 Gemini 分析按鈕" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🤖 norm1.png — 點擊 Gemini 分析</div>'">
+            <div class="card-overlay"></div>
+            <div class="card-badge">Gemini AI</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 9 — 確認並開始分析 -->
+      <div class="step">
+        <div class="step-img">
+          <div class="card-wrap" data-step="n2">
+            <img src="norm2.png" alt="開始分析視窗" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>▶️ norm2.png — 開始分析視窗</div>'">
+            <div class="card-overlay"></div>
+            <div class="card-badge">Analysis</div>
+          </div>
+        </div>
+        <div class="step-meta">
+          <div class="step-number">Step 09</div>
+          <h3 class="step-heading">確認分析流程<br>點擊「開始分析」</h3>
+          <p class="step-body">
+            系統彈出說明視窗，顯示三個自動步驟：
+          </p>
+          <ol style="color:var(--muted);line-height:2.2;padding-left:1.2rem;font-size:0.95rem;">
+            <li>把畫布輸出為 <strong style="color:var(--text);">PDF 檔</strong>並下載到本機</li>
+            <li>用外接 Gemini <strong style="color:var(--text);">讀取 PDF</strong> 並輸出正規化建議</li>
+            <li>將 Gemini 建議轉成可建立的<strong style="color:var(--text);">邏輯資料表</strong></li>
+          </ol>
+          <div class="tip">
+            <span class="tip-icon">⚠️</span>
+            <span>需事先在伺服器設定環境變數 <strong>GEMINI_API_KEY</strong>，可選設定 GEMINI_MODEL。</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 10 — 查看正規化結果 -->
+      <div class="step">
+        <div class="step-meta">
+          <div class="step-number">Step 10</div>
+          <h3 class="step-heading">查看正規化建議<br>建立實體圖</h3>
+          <p class="step-body">
+            Gemini 分析完成後，視窗會顯示<strong>正規化後的資料表預覽</strong>，包含各表欄位建議（如：賽道、車手、車隊、賽事…）。<br><br>
+            確認無誤後點擊<strong>「建立正規化實體圖」</strong>，自動產生優化後的 ER 圖。
+          </p>
+          <div class="tip">
+            <span class="tip-icon">✨</span>
+            <span>Gemini 會依資料領域自動判斷並建議合理的資料表數量與欄位，大幅減少人工設計時間。</span>
+          </div>
+        </div>
+        <div class="step-img">
+          <div class="card-wrap" data-step="n3">
+            <img src="norm3.png" alt="正規化結果與建立實體圖" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>✨ norm3.png — 正規化結果</div>'">
+            <div class="card-overlay"></div>
+            <div class="card-badge">Result</div>
           </div>
         </div>
       </div>
