@@ -302,6 +302,76 @@
   }
   #overlay.active { display: block; }
 
+  /* ── Gemini Intro ── */
+  .gemini-intro {
+    padding: 4rem 1.5rem;
+    position: relative;
+  }
+  .gemini-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 3rem 3.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(168,85,247,0.25);
+    background: linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(168,85,247,0.04) 100%);
+    box-shadow: 0 0 60px rgba(168,85,247,0.08), inset 0 0 40px rgba(168,85,247,0.03);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .gemini-inner::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .gemini-icon-wrap {
+    width: 64px; height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(168,85,247,0.15));
+    border: 1px solid rgba(168,85,247,0.3);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 24px rgba(168,85,247,0.25);
+  }
+  .gemini-title {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 700;
+    background: linear-gradient(120deg, #fff 30%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gemini-desc {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    max-width: 620px;
+  }
+  .gemini-desc strong { color: var(--text); }
+  .gemini-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+  .g-pill {
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    background: rgba(168,85,247,0.12);
+    border: 1px solid rgba(168,85,247,0.28);
+    font-size: 0.82rem;
+    color: #c084fc;
+    letter-spacing: 0.03em;
+  }
+
   /* ── Divider glow ── */
   .glow-divider {
     width: 100%;
@@ -390,6 +460,43 @@
     <div class="scroll-hint">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
       Scroll
+    </div>
+  </section>
+
+  <div class="glow-divider"></div>
+
+  <!-- ══ GEMINI INTRO ══ -->
+  <section class="gemini-intro">
+    <div class="gemini-inner">
+      <div class="gemini-icon-wrap">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <path d="M18 3C18 3 22 11 30 14C22 17 18 25 18 25C18 25 14 17 6 14C14 11 18 3 18 3Z" fill="url(#g1)"/>
+          <path d="M18 25C18 25 20 29 24 31C20 33 18 36 18 36C18 36 16 33 12 31C16 29 18 25 18 25Z" fill="url(#g2)" opacity="0.7"/>
+          <defs>
+            <linearGradient id="g1" x1="6" y1="3" x2="30" y2="25" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#c084fc"/>
+              <stop offset="1" stop-color="#7c3aed"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="12" y1="25" x2="24" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#c084fc"/>
+              <stop offset="1" stop-color="#7c3aed"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="gemini-text">
+        <h2 class="gemini-title">全局串接 Gemini AI</h2>
+        <p class="gemini-desc">
+          ERCanvas 深度整合 Google Gemini，從<strong>欄位英文命名</strong>、<strong>資料庫正規化分析</strong>到<strong>ER 圖自動重建</strong>，
+          AI 貫穿整個設計流程，讓你專注在業務邏輯而非繁瑣的技術細節。
+        </p>
+      </div>
+      <div class="gemini-pills">
+        <span class="g-pill">✦ 自動英文命名</span>
+        <span class="g-pill">✦ PDF 結構分析</span>
+        <span class="g-pill">✦ 正規化建議</span>
+        <span class="g-pill">✦ 實體圖重建</span>
+      </div>
     </div>
   </section>
 
