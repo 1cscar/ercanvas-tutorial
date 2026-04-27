@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERCanvas × MySQL — 完整使用教學</title>
+<style>
+  :root {
+    --purple: #a855f7;
+    --purple-dim: #7c3aed;
+    --purple-glow: rgba(168, 85, 247, 0.35);
+    --purple-faint: rgba(168, 85, 247, 0.08);
+    --bg: #050508;
+    --surface: #0d0d14;
+    --card: #11111d;
+    --border: rgba(168, 85, 247, 0.18);
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── Custom Cursor ── */
+  #cursor-dot {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--purple);
+    box-shadow: 0 0 12px 4px var(--purple-glow);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s linear;
+  }
+  #cursor-ring {
+    position: fixed;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(168,85,247,0.55);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.12s ease-out, width 0.2s, height 0.2s, border-color 0.2s;
+  }
+  body:has(a:hover) #cursor-ring,
+  body:has(button:hover) #cursor-ring {
+    width: 56px; height: 56px;
+    border-color: var(--purple);
+  }
+
+  /* ── Particle Canvas ── */
+  #particle-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Layout ── */
+  .content { position: relative; z-index: 1; }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+  }
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 1.5rem;
+    opacity: 0.85;
+  }
+  .hero-title {
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    font-weight: 800;
+    line-height: 1.05;
+    background: linear-gradient(135deg, #fff 30%, var(--purple) 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+  }
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 2.2rem;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--purple-dim), var(--purple));
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 0 32px var(--purple-glow);
+    transition: box-shadow 0.25s, transform 0.2s;
+    cursor: none;
+  }
+  .hero-cta:hover {
+    box-shadow: 0 0 56px var(--purple-glow);
+    transform: translateY(-2px);
+  }
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  .scroll-hint svg { opacity: 0.5; }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  /* ── Section ── */
+  .section {
+    padding: 6rem 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 0.75rem;
+  }
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(120deg, #fff 40%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .section-desc {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    max-width: 540px;
+    margin-bottom: 4rem;
+  }
+
+  /* ── Steps ── */
+  .steps { display: flex; flex-direction: column; gap: 5rem; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .step.visible { opacity: 1; transform: translateY(0); }
+  .step:nth-child(even) .step-img { order: -1; }
+
+  .step-meta { display: flex; flex-direction: column; gap: 1.2rem; }
+  .step-number {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .step-number::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    max-width: 48px;
+    background: var(--border);
+  }
+  .step-heading {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .step-body {
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 0.975rem;
+  }
+  .step-body strong { color: var(--text); }
+  .tip {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 10px;
+    background: var(--purple-faint);
+    border: 1px solid var(--border);
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Card (image) ── */
+  .step-img {
+    position: relative;
+    cursor: none;
+  }
+  .card-wrap {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow:
+      0 0 0 1px rgba(168,85,247,0.06),
+      0 8px 40px rgba(0,0,0,0.6),
+      0 0 60px rgba(168,85,247,0.05);
+    transition: transform 0.45s cubic-bezier(.22,1,.36,1),
+                box-shadow 0.45s ease,
+                border-color 0.3s;
+  }
+  .card-wrap:hover {
+    transform: scale(1.035) translateY(-6px);
+    box-shadow:
+      0 0 0 1px rgba(168,85,247,0.25),
+      0 20px 60px rgba(0,0,0,0.7),
+      0 0 80px rgba(168,85,247,0.18);
+    border-color: rgba(168,85,247,0.4);
+  }
+  .card-wrap img {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+  }
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: linear-gradient(180deg, transparent 60%, rgba(5,5,8,0.7) 100%);
+    pointer-events: none;
+  }
+  .card-badge {
+    position: absolute;
+    top: 14px; left: 14px;
+    padding: 4px 12px;
+    border-radius: 50px;
+    background: rgba(168,85,247,0.18);
+    border: 1px solid rgba(168,85,247,0.35);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--purple);
+    backdrop-filter: blur(8px);
+  }
+  /* expand-on-click modal */
+  .card-wrap.expanded {
+    position: fixed;
+    inset: 5vw;
+    z-index: 800;
+    transform: none !important;
+    border-radius: 20px;
+    overflow: auto;
+    max-height: 90vh;
+  }
+  .card-wrap.expanded img { width: 100%; height: auto; }
+  #overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    z-index: 799;
+    cursor: none;
+  }
+  #overlay.active { display: block; }
+
+  /* ── Divider glow ── */
+  .glow-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--purple), transparent);
+    opacity: 0.3;
+    margin: 0 auto;
+  }
+
+  /* ── Feature pills ── */
+  .features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 5rem 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+    justify-content: center;
+  }
+  .feature-pill {
+    padding: 0.55rem 1.2rem;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    font-size: 0.85rem;
+    color: var(--muted);
+    transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+  .feature-pill:hover {
+    border-color: var(--purple);
+    color: var(--text);
+    box-shadow: 0 0 16px var(--purple-glow);
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 3rem 1.5rem 4rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+    border-top: 1px solid rgba(168,85,247,0.08);
+  }
+  footer a { color: var(--purple); text-decoration: none; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .step {
+      grid-template-columns: 1fr;
+    }
+    .step:nth-child(even) .step-img { order: 0; }
+  }
+
+  /* ── Image placeholder (if img missing) ── */
+  .img-placeholder {
+    width: 100%; aspect-ratio: 16/10;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-radius: 14px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Particle canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- Expand overlay -->
+<div id="overlay"></div>
+
+<div class="content">
+
+  <!-- ══ HERO ══ -->
+  <section class="hero">
+    <p class="hero-eyebrow">Step-by-step Tutorial</p>
+    <h1 class="hero-title">ERCanvas<br>× MySQL</h1>
+    <p class="hero-sub">從視覺化 ER 設計到資料庫建立，<br>五個步驟完成完整工作流程。</p>
+    <a href="#steps" class="hero-cta">
+      開始教學
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </a>
+    <div class="scroll-hint">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      Scroll
+    </div>
+  </section>
+
+  <div class="glow-divider"></div>
+
+  <!-- ══ STEPS ══ -->
+  <section class="section" id="steps">
+    <p class="section-label">使用流程</p>
+    <h2 class="section-title">五步驟完成<br>資料庫設計</h2>
+    <p class="section-desc">透過 ERCanvas 強大的視覺化工具，搭配 MySQL Workbench，輕鬆完成從設計到部署的全流程。</p>
+
+    <div class="steps">
+
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-meta">
+          <div class="step-number">Step 01</div>
+          <h3 class="step-heading">在 ERCanvas 設計<br>邏輯模型並匯出 SQL</h3>
+          <p class="step-body">
+            在 ERCanvas 的<strong>邏輯模型</strong>模式中建立 ER 圖，設定好資料表與欄位後，點擊頂部工具列的
+            <strong>「匯出 MySQL SQL」</strong>按鈕。<br><br>
+            善用<strong>「AI 自動正規化」</strong>功能讓模型自動優化，以及<strong>「外來鍵設定關聯主鍵」</strong>確保資料完整性。
+          </p>
+          <div class="tip">
+            <span class="tip-icon">💡</span>
+            <span>點擊「輸出 PDF 並交由 Gemini 分析」，系統會<strong>自動翻譯英文名稱</strong>，無需手動輸入英文欄位名。</span>
+          </div>
+        </div>
+        <div class="step-img">
+          <div class="card-wrap" data-step="1">
+            <img src="step1.png" alt="ERCanvas 逻辑模型設計介面" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>📐 step1.png — ERCanvas 設計介面</div>'">
+            <div class="card-overlay"></div>
+            <div class="card-badge">ERCanvas</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-img">
+          <div class="card-wrap" data-step="2">
+            <img src="step2.png" alt="匯出檔案" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>📁 step2.png — 匯出檔案清單</div>'">
+            <div class="card-overlay"></div>
+            <div class="card-badge">Export</div>
+          </div>
+        </div>
+        <div class="step-meta">
+          <div class="step-number">Step 02</div>
+          <h3 class="step-heading">自動產生 .sql<br>與中英翻譯對照檔</h3>
+          <p class="step-body">
+            匯出完成後，系統會自動儲存兩份檔案到你的電腦：
+          </p>
+          <ul style="color:var(--muted);line-height:2;padding-left:1.2rem;font-size:0.95rem;">
+            <li><strong style="color:var(--text);">*.sql</strong> — 可直接匯入 MySQL 的建表語法</li>
+            <li><strong style="color:var(--text);">*_zh_en_mapping.csv</strong> — 中英欄位名稱對照表</li>
+          </ul>
+          <div class="tip">
+            <span class="tip-icon">📂</span>
+            <span>檔案預設儲存於下載資料夾，可直接拖曳至 MySQL Workbench 使用。</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-meta">
+          <div class="step-number">Step 03</div>
+          <h3 class="step-heading">開啟 MySQL Workbench<br>選擇或建立連線</h3>
+          <p class="step-body">
+            開啟 MySQL Workbench，在首頁的 <strong>MySQL Connections</strong> 中選擇目標資料庫連線（如 t1、t2、t3）。
+          </p>
+          <div class="tip">
+            <span class="tip-icon">🛡️</span>
+            <span>如果<strong>擔心影響現有資料庫</strong>，建議點選「+」新建一個獨立連線，避免風險。</span>
+          </div>
+        </div>
+        <div class="step-img">
+          <div class="card-wrap" data-step="3">
+            <img src="step3.png" alt="MySQL Workbench 連線選擇" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>🔌 step3.png — MySQL Workbench 連線</div>'">
+            <div class="card-overlay"></div>
+            <div class="card-badge">MySQL Workbench</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-img">
+          <div class="card-wrap" data-step="4">
+            <img src="step4.png" alt="匯入 SQL 檔案" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>📥 step4.png — 匯入 SQL 檔案</div>'">
+            <div class="card-overlay"></div>
+            <div class="card-badge">Import</div>
+          </div>
+        </div>
+        <div class="step-meta">
+          <div class="step-number">Step 04</div>
+          <h3 class="step-heading">匯入 .sql 檔案<br>載入建表語法</h3>
+          <p class="step-body">
+            進入連線後，點擊左上角的<strong>「開啟 SQL 檔案」</strong>圖示（資料夾圖示），選擇剛剛匯出的 <strong>.sql 檔案</strong>。<br><br>
+            編輯器中會顯示完整的 CREATE TABLE 語法，包含所有資料表結構。
+          </p>
+          <div class="tip">
+            <span class="tip-icon">⚠️</span>
+            <span>確認頂部顯示的資料庫名稱（黃色框）是否正確。若名稱重複，請先修改 SQL 中的 DATABASE 名稱再繼續。</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step">
+        <div class="step-meta">
+          <div class="step-number">Step 05</div>
+          <h3 class="step-heading">點擊閃電圖示<br>執行並完成建表</h3>
+          <p class="step-body">
+            確認 SQL 內容無誤後，點擊工具列上的<strong>閃電 ⚡ 圖示</strong>執行所有語法。<br><br>
+            執行完成後，在左側 <strong>Schemas</strong> 面板即可看到所有建立好的資料表名稱，資料庫設計正式完成！
+          </p>
+          <div class="tip">
+            <span class="tip-icon">✅</span>
+            <span>在左側 Tables 清單確認 driver、event、race 等表格都正確建立，即代表整個流程成功完成。</span>
+          </div>
+        </div>
+        <div class="step-img">
+          <div class="card-wrap" data-step="5">
+            <img src="step5.png" alt="執行 SQL 並建立資料表" onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\'>⚡ step5.png — 執行建表完成</div>'">
+            <div class="card-overlay"></div>
+            <div class="card-badge">Execute</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /steps -->
+  </section>
+
+  <div class="glow-divider"></div>
+
+  <!-- ══ FEATURES ══ -->
+  <div class="features">
+    <div class="feature-pill">🎨 視覺化 ER 設計</div>
+    <div class="feature-pill">🤖 AI 自動正規化</div>
+    <div class="feature-pill">🌐 自動中英翻譯</div>
+    <div class="feature-pill">📤 一鍵匯出 MySQL SQL</div>
+    <div class="feature-pill">📋 中英對照 CSV</div>
+    <div class="feature-pill">🔗 外來鍵關聯設定</div>
+    <div class="feature-pill">📄 PDF Gemini 分析</div>
+    <div class="feature-pill">⚡ 快速建立資料庫</div>
+  </div>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <p>ERCanvas 使用教學 &nbsp;·&nbsp; 從設計到部署，五步驟完成</p>
+    <p style="margin-top:0.5rem;opacity:0.5;">點擊任意圖片可放大預覽</p>
+  </footer>
+
+</div><!-- /content -->
+
+<script>
+// ── Cursor ──
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = -200, my = -200, rx = -200, ry = -200;
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animateCursor() {
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+  rx += (mx - rx) * 0.14; ry += (my - ry) * 0.14;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animateCursor);
+})();
+
+// ── Particle System ──
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+const N = 120;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function rand(a, b) { return a + Math.random() * (b - a); }
+
+for (let i = 0; i < N; i++) {
+  particles.push({
+    x: rand(0, 1) * window.innerWidth,
+    y: rand(0, 1) * window.innerHeight,
+    r: rand(1.2, 3.2),
+    vx: rand(-0.3, 0.3),
+    vy: rand(-0.25, 0.25),
+    alpha: rand(0.35, 0.85),
+    hue: rand(260, 300),
+  });
+}
+
+(function animateParticles() {
+  ctx.clearRect(0, 0, W, H);
+
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+
+    const dx = p.x - mx, dy = p.y - my;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const clearR = 120;
+    const blurFactor = dist < clearR ? dist / clearR : 1;
+
+    const baseAlpha = p.alpha * blurFactor;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 80%, 68%, ${baseAlpha})`;
+    ctx.shadowColor = `hsla(${p.hue}, 90%, 70%, ${baseAlpha * 0.8})`;
+    ctx.shadowBlur = dist < clearR ? 4 : 14;
+    ctx.fill();
+  });
+
+  // mouse glow
+  const g = ctx.createRadialGradient(mx, my, 0, mx, my, 140);
+  g.addColorStop(0, 'rgba(168,85,247,0.12)');
+  g.addColorStop(1, 'rgba(168,85,247,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  requestAnimationFrame(animateParticles);
+})();
+
+// ── Scroll reveal ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.step').forEach(el => observer.observe(el));
+
+// ── Card expand / click ──
+const overlay = document.getElementById('overlay');
+let expanded = null;
+
+document.querySelectorAll('.card-wrap').forEach(card => {
+  card.addEventListener('click', () => {
+    if (expanded) { collapse(); return; }
+    card.classList.add('expanded');
+    overlay.classList.add('active');
+    expanded = card;
+  });
+});
+
+overlay.addEventListener('click', collapse);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') collapse(); });
+
+function collapse() {
+  if (!expanded) return;
+  expanded.classList.remove('expanded');
+  overlay.classList.remove('active');
+  expanded = null;
+}
+</script>
+</body>
+</html>
